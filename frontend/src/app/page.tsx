@@ -7,7 +7,7 @@ export default function Home() {
       Algorithm Visualizer Sandbox
     </h1>
     <a
-      href="/visualise"
+      href="/selector"
       className="mt-8 px-6 py-3 bg-cyan-400 text-white font-mono font-extrabold uppercase tracking-wide rounded-lg hover:bg-blue-700 transition"
     >
       Start Visualising Now!
