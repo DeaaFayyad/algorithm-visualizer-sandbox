@@ -7,3 +7,4 @@ Minor README update for Oct 4
 Minor README update for Oct 5
 Minor README update for Oct 6
 Minor README update for Oct 7
+Minor README update for Oct 8
