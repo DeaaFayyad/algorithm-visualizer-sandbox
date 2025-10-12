@@ -1,8 +1,17 @@
 "use client";
 
 import React from 'react';
-import { getMergeSortAnimations } from '../../sortingAlgorithms/sortingAlgorithms.js';
 import './SortingVisualiser.css';
+
+async function fetchAnimations(algorithm, array) {
+  const response = await fetch("http://127.0.0.1:8000/sort", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ algorithm, array }),
+  });
+  const data = await response.json();
+  return data.animations;
+}
 
 // Change this value for the speed of the animations.
 const ANIMATION_SPEED_MS = 1;
@@ -37,40 +46,46 @@ export default class SortingVisualizer extends React.Component {
     this.setState({array});
   }
 
-  mergeSort() {
-    const animations = getMergeSortAnimations(this.state.array);
-    for (let i = 0; i < animations.length; i++) {
-      const arrayBars = document.getElementsByClassName('array-bar');
-      const isColorChange = i % 3 !== 2;
-      if (isColorChange) {
-        const [barOneIdx, barTwoIdx] = animations[i];
-        const barOneStyle = arrayBars[barOneIdx].style;
-        const barTwoStyle = arrayBars[barTwoIdx].style;
-        const color = i % 3 === 0 ? SECONDARY_COLOR : PRIMARY_COLOR;
-        setTimeout(() => {
-          barOneStyle.backgroundColor = color;
-          barTwoStyle.backgroundColor = color;
-        }, i * ANIMATION_SPEED_MS);
-      } else {
-        setTimeout(() => {
-          const [barOneIdx, newHeight] = animations[i];
-          const barOneStyle = arrayBars[barOneIdx].style;
-          barOneStyle.height = `${newHeight}px`;
-        }, i * ANIMATION_SPEED_MS);
-      }
-    }
+  async mergeSort() {
+    const animations = await fetchAnimations("merge", this.state.array);
+    this.playAnimations(animations);
   }
 
-  quickSort() {
-    // We leave it as an exercise to the viewer of this code to implement this method.
+  async quickSort() {
+    const animations = await fetchAnimations("quick", this.state.array);
+    this.playAnimations(animations);
   }
 
-  heapSort() {
-    // We leave it as an exercise to the viewer of this code to implement this method.
+  async selectionSort() {
+    const animations = await fetchAnimations("selection", this.state.array);
+    this.playAnimations(animations);
   }
 
-  bubbleSort() {
-    // We leave it as an exercise to the viewer of this code to implement this method.
+  async bubbleSort() {
+    const animations = await fetchAnimations("bubble", this.state.array);
+    this.playAnimations(animations);
+  }
+
+  async insertionSort() {
+    const animations = await fetchAnimations("insertion", this.state.array);
+    this.playAnimations(animations);
+  }
+
+
+  playAnimations(animations) {
+    const arrayBars = document.getElementsByClassName('array-bar');
+    animations.forEach(([action, i, jOrValue], idx) => {
+      setTimeout(() => {
+        if (action === "compare") {
+          arrayBars[i].style.backgroundColor = "red";
+          arrayBars[jOrValue].style.backgroundColor = "red";
+        } else if (action === "swap" || action === "overwrite") {
+          arrayBars[i].style.height = `${jOrValue}px`;
+        } else if (action === "sorted") {
+          arrayBars[i].style.backgroundColor = "green";
+        }
+      }, idx * ANIMATION_SPEED_MS);
+    });
   }
 
   // NOTE: This method will only work if your sorting algorithms actually return
@@ -84,44 +99,31 @@ export default class SortingVisualizer extends React.Component {
         array.push(randomIntFromInterval(-1000, 1000));
       }
       const javaScriptSortedArray = array.slice().sort((a, b) => a - b);
-      const mergeSortedArray = getMergeSortAnimations(array.slice());
       console.log(arraysAreEqual(javaScriptSortedArray, mergeSortedArray));
     }
   }
 
-    render() {
+  render() {
     const { array } = this.state;
-
+  
     return (
-        <div className="visualiser-wrapper">
+      <div className="visualiser-wrapper flex flex-col items-center">
         {/* Bars container */}
         <div className="array-container">
-            {array.map((value, idx) => (
+          {array.map((value, idx) => (
             <div
-                className="array-bar"
-                key={idx}
-                style={{
+              className="array-bar"
+              key={idx}
+              style={{
                 backgroundColor: PRIMARY_COLOR,
                 height: `${value}px`,
-                }}
+              }}
             ></div>
-            ))}
+          ))}
         </div>
-
-        {/* Buttons container */}
-        <div className="controls">
-            <button onClick={() => this.resetArray()}>Generate New Array</button>
-            <button onClick={() => this.mergeSort()}>Merge Sort</button>
-            <button onClick={() => this.quickSort()}>Quick Sort</button>
-            <button onClick={() => this.heapSort()}>Heap Sort</button>
-            <button onClick={() => this.bubbleSort()}>Bubble Sort</button>
-            <button onClick={() => this.testSortingAlgorithms()}>
-            Test Sorting Algorithms (BROKEN)
-            </button>
-        </div>
-        </div>
+      </div>
     );
-    }
+  }
 }
 
 // From https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript

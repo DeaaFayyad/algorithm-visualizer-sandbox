@@ -1,14 +1,19 @@
 "use client";
 import { useState } from "react";
 
-export default function Controls({ mode }: { mode: "custom" | "random" }) {
+interface ControlsProps {
+  mode: "custom" | "random";
+  onGenerate: () => void;
+}
+
+export default function Controls({ mode, onGenerate }: ControlsProps) {
   const [dataType, setDataType] = useState("");
   const [arraySize, setArraySize] = useState(500);
   const [customArray, setCustomArray] = useState("");
 
   return (
     <div className="flex flex-col gap-6 p-8 items-center">
-      {/* Dropdown (always shown) */}
+      {/* Dropdown */}
       <div>
         <label className="block text-sm font-medium mb-2">Variable Type:</label>
         <select
@@ -23,7 +28,7 @@ export default function Controls({ mode }: { mode: "custom" | "random" }) {
         </select>
       </div>
 
-      {/* Slider (always shown) */}
+      {/* Slider */}
       <div className="w-64">
         <label className="block text-sm font-medium mb-2">
           Array size: {arraySize}
@@ -38,30 +43,34 @@ export default function Controls({ mode }: { mode: "custom" | "random" }) {
         />
       </div>
 
-{/* Custom-only input + generate button */}
-{mode === "custom" && (
-  <div className="flex flex-col gap-4 items-center">
-    <div>
-      <label className="block text-sm font-medium mb-2">Input Array:</label>
-      <input
-        type="text"
-        value={customArray}
-        onChange={(e) => setCustomArray(e.target.value)}
-        placeholder="e.g. 5, 10, 3, 7"
-        className="border rounded-lg p-2 w-64"
-      />
-    </div>
-
-    {/* Button right under input */}
-    <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
-      Generate Custom Array
-    </button>
-  </div>
-)}
+      {/* Custom Array Input */}
+      {mode === "custom" && (
+        <div className="flex flex-col gap-4 items-center">
+          <div>
+            <label className="block text-sm font-medium mb-2">Input Array:</label>
+            <input
+              type="text"
+              value={customArray}
+              onChange={(e) => setCustomArray(e.target.value)}
+              placeholder="e.g. 5, 10, 3, 7"
+              className="border rounded-lg p-2 w-64"
+            />
+          </div>
+          <button
+            onClick={onGenerate}
+            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+          >
+            Generate Custom Array
+          </button>
+        </div>
+      )}
 
       {/* Random-only button */}
       {mode === "random" && (
-        <button className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        <button
+          onClick={onGenerate}
+          className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+        >
           Generate Random Array
         </button>
       )}
